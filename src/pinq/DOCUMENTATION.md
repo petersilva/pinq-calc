@@ -4,12 +4,14 @@ Pinq-calc: calculate things obviously, it turns out to be python.
 
 ## Introduction
 
+Python is a very way to write calculations, so a computer can compute results.
 For those learning Python, or who like Python, or people who want a
 calculator that is just a little more powerful than standard calculator apps.
 This app acts like calculator, but also like a python interpreter, with 
 some small wrinkles to make it more intuitive to use as a calculator.
 
-Can use on-screen keypad, or standard computer keyboard & keypad (no mouse needed for calculations.)
+Can use on-screen keypad & keyboard when touch makes more sense, 
+or you can hide those, and use a standard computer keyboard & keypad. 
 
 ## Terminal
 - Type any Python expression or statement at the **>>>** prompt.
@@ -19,12 +21,15 @@ Can use on-screen keypad, or standard computer keyboard & keypad (no mouse neede
 - Use **Up/Down** arrows for command history.
 - Type `clear()` to reset the session.
 - Type 'quit()' to exit.
-- if you have a long series of calculations, the old results scroll off the top, and the 
+- If you have a long series of calculations, the old results scroll off the top, and the 
   interpreter window becomes scrollable, so you can still go back and see them.
+- To refer to the last calculation result, it's in underscore, just like in the python interpreter.
+- To store values, create a python assignment statement:  LengthOfThing=34.5
+  You then have a LengthOfThing button you can use for inclusion in later calculations.
 
 ## Math Module Column
 
-- python has a standard module accessed using *import math* in python interpreters.
+- python has a standard module accessed using *from math import \** in python interpreters.
 - The middle *Math Module* column has buttons for each of the entitites defined by the python math module.
 - For detailed documentation, look into documentation for that module. (https://docs.python.org/3/library/math.html)
 
@@ -75,4 +80,10 @@ Can use on-screen keypad, or standard computer keyboard & keypad (no mouse neede
 
 * from Source:
   * pip install -e . --break-system-packages
+
+## Contributions
+
+This was just something I personally wanted. Suggestions and Contributions welcome.
+The home is: https://github.com/petersilva/pinq-calc
+
 
