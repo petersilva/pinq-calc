@@ -47,6 +47,10 @@ Can use on-screen keypad, or standard computer keyboard & keypad (no mouse neede
 - The **clear** button resets the entire session.
 - Click the button (**▼ Keypad** / **▲ Keypad**) at the bottom of the left column (or use **View -> Show Keypad**) to toggle keypad visibility. When hidden, the interpreter expands to fill the left column.
 
+## On-Screen Keyboard
+- Click the toggle bar (**▲ Keyboard** / **▼ Keyboard**) at the very bottom of the application (or use **View -> Show On-Screen Keyboard**) to display a full QWERTY keyboard spanning under all three columns.
+- Hidden by default. Includes shift, caps lock, backspace, navigation arrows, space, and clear keys.
+
 ## Symbol Table
 - **Variables**: Double-click to edit values inline.
 - **Functions**: Double-click to open the code editor.

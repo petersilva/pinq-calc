@@ -143,6 +143,12 @@ class InterpreterWidget(QTextEdit):
 
         self.replace_current_line(self.history[self.history_index])
 
+    def handle_backspace(self):
+        cursor = self.textCursor()
+        if cursor.position() > self.input_start_pos:
+            cursor.deletePreviousChar()
+        self.setFocus()
+
     def replace_current_line(self, new_text):
         cursor = self.textCursor()
         cursor.setPosition(self.input_start_pos)

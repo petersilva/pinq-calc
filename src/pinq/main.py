@@ -13,6 +13,7 @@ from pinq.interpreter import InterpreterWidget
 from pinq.symbols import SymbolTableWidget
 from pinq.keypad import KeypadWidget
 from pinq.math_panel import MathModuleWidget
+from pinq.keyboard import KeyboardWidget
 
 def get_documentation_text() -> str:
     """Reads and returns the contents of DOCUMENTATION.md."""
@@ -53,7 +54,7 @@ PINK_THEME = """
     QPushButton:pressed {
         background-color: #FFB6C1;
     }
-    QPushButton#keypad_toggle_btn {
+    QPushButton#keypad_toggle_btn, QPushButton#keyboard_toggle_btn {
         background-color: #FFE4E1;
         color: #2D2D2D;
         border: 1px solid #FFC0CB;
@@ -83,16 +84,19 @@ class MainWindow(QMainWindow):
         self.config_file = os.path.expanduser("~/.pinq_config.ini")
         self.use_system_colors = False
         self.show_keypad = True
+        self.show_keyboard = False
 
         self.load_config()
         self.init_ui()
         self.create_menus()
         self.apply_theme()
         self.set_keypad_visible(self.show_keypad)
+        self.set_keyboard_visible(self.show_keyboard)
         self.load_auto_session()
 
     def load_config(self):
         self.show_keypad = True
+        self.show_keyboard = False
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r') as f:
@@ -101,6 +105,8 @@ class MainWindow(QMainWindow):
                             self.use_system_colors = line.strip().split('=')[1].lower() == 'true'
                         elif line.startswith("show_keypad="):
                             self.show_keypad = line.strip().split('=')[1].lower() == 'true'
+                        elif line.startswith("show_keyboard="):
+                            self.show_keyboard = line.strip().split('=')[1].lower() == 'true'
             except Exception as e:
                 print(f"Failed to load config: {e}")
 
@@ -109,6 +115,7 @@ class MainWindow(QMainWindow):
             with open(self.config_file, 'w') as f:
                 f.write(f"use_system_colors={self.use_system_colors}\n")
                 f.write(f"show_keypad={self.show_keypad}\n")
+                f.write(f"show_keyboard={self.show_keyboard}\n")
         except Exception as e:
             print(f"Failed to save config: {e}")
 
@@ -131,6 +138,46 @@ class MainWindow(QMainWindow):
         self.show_keypad = visible
         self.save_config()
 
+    def toggle_keyboard(self):
+        visible = not self.keyboard_panel.isVisible()
+        self.set_keyboard_visible(visible)
+
+    def set_keyboard_visible(self, visible: bool):
+        self.keyboard_panel.setVisible(visible)
+        if visible:
+            self.keyboard_toggle_btn.setText("▼ Keyboard")
+            self.keyboard_toggle_btn.setToolTip("Click to hide on-screen keyboard")
+        else:
+            self.keyboard_toggle_btn.setText("▲ Keyboard")
+            self.keyboard_toggle_btn.setToolTip("Click to show on-screen keyboard")
+        
+        if hasattr(self, 'show_keyboard_action'):
+            self.show_keyboard_action.setChecked(visible)
+            
+        self.show_keyboard = visible
+        self.save_config()
+
+    def handle_keyboard_input(self, key_str):
+        if key_str == "Enter":
+            self.interpreter.execute_current_line()
+        elif key_str == "Backspace":
+            self.interpreter.handle_backspace()
+        elif key_str == "Tab":
+            self.interpreter.append_text("    ")
+        elif key_str == "Clear":
+            self.interpreter.process_command("clear()")
+        elif key_str == "Left":
+            cursor = self.interpreter.textCursor()
+            if cursor.position() > self.interpreter.input_start_pos:
+                cursor.movePosition(QTextCursor.Left)
+                self.interpreter.setTextCursor(cursor)
+        elif key_str == "Right":
+            cursor = self.interpreter.textCursor()
+            cursor.movePosition(QTextCursor.Right)
+            self.interpreter.setTextCursor(cursor)
+        else:
+            self.interpreter.append_text(key_str)
+
     def apply_theme(self):
         if self.use_system_colors:
             QApplication.instance().setStyleSheet("")
@@ -141,11 +188,13 @@ class MainWindow(QMainWindow):
         # Main Central Widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        main_layout = QHBoxLayout(central_widget)
+        main_layout = QVBoxLayout(central_widget)
+        main_layout.setContentsMargins(4, 4, 4, 4)
+        main_layout.setSpacing(2)
 
-        # Splitter for Left (Interpreter/Keypad) and Right (Symbol Table)
+        # Splitter for Left (Interpreter/Keypad), Middle (Math), and Right (Symbol Table)
         self.splitter = QSplitter(Qt.Horizontal)
-        main_layout.addWidget(self.splitter)
+        main_layout.addWidget(self.splitter, 1)
 
         # Left Side Container
         left_container = QWidget()
@@ -189,12 +238,26 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(left_container)
         self.splitter.addWidget(self.math_panel)
         self.splitter.addWidget(right_container)
+
+        # On-Screen Keyboard Panel (spans under all 3 columns)
+        self.keyboard_panel = KeyboardWidget(self)
+        main_layout.addWidget(self.keyboard_panel, 0)
+
+        # Keyboard Toggle Bar (at bottom of application)
+        self.keyboard_toggle_btn = QPushButton("▲ Keyboard")
+        self.keyboard_toggle_btn.setObjectName("keyboard_toggle_btn")
+        self.keyboard_toggle_btn.setToolTip("Click to show/hide on-screen keyboard")
+        self.keyboard_toggle_btn.setMaximumHeight(20)
+        self.keyboard_toggle_btn.setCursor(Qt.PointingHandCursor)
+        self.keyboard_toggle_btn.clicked.connect(self.toggle_keyboard)
+        main_layout.addWidget(self.keyboard_toggle_btn, 0)
         
         # Connections
         self.interpreter.command_executed.connect(self.symbol_table.refresh)
         self.keypad.button_clicked.connect(self.interpreter.append_text)
         self.math_panel.button_clicked.connect(self.interpreter.append_text)
         self.symbol_table.name_clicked.connect(self.interpreter.append_text)
+        self.keyboard_panel.key_pressed.connect(self.handle_keyboard_input)
         
         # Initial proportions
         self.splitter.setStretchFactor(0, 3)
@@ -251,6 +314,12 @@ class MainWindow(QMainWindow):
         self.show_keypad_action.setChecked(self.show_keypad)
         self.show_keypad_action.triggered.connect(lambda checked: self.set_keypad_visible(checked))
         view_menu.addAction(self.show_keypad_action)
+
+        self.show_keyboard_action = QAction("Show On-Screen &Keyboard", self, checkable=True)
+        self.show_keyboard_action.setShortcut("Ctrl+Shift+K")
+        self.show_keyboard_action.setChecked(self.show_keyboard)
+        self.show_keyboard_action.triggered.connect(lambda checked: self.set_keyboard_visible(checked))
+        view_menu.addAction(self.show_keyboard_action)
 
         # Help Menu
         help_menu = menubar.addMenu("&Help")
