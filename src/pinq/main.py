@@ -3,7 +3,7 @@ import os
 import signal
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QSplitter, QFileDialog, QMessageBox,
-                             QDialog, QTextEdit, QPushButton)
+                             QDialog, QTextEdit, QPushButton, QLabel)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QCloseEvent
 
@@ -129,12 +129,22 @@ class MainWindow(QMainWindow):
         # Middle Side Container (Math Module Panel)
         self.math_panel = MathModuleWidget(self)
 
-        # Right Side Container (Symbol Table)
+        # Right Side Container (Symbol Table with Header)
+        right_container = QWidget()
+        right_layout = QVBoxLayout(right_container)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+
+        right_header = QLabel("User Defined")
+        right_header.setAlignment(Qt.AlignCenter)
+        right_header.setStyleSheet("font-weight: bold; padding: 5px;")
+        right_layout.addWidget(right_header)
+
         self.symbol_table = SymbolTableWidget(self.session, self)
+        right_layout.addWidget(self.symbol_table)
         
         self.splitter.addWidget(left_container)
         self.splitter.addWidget(self.math_panel)
-        self.splitter.addWidget(self.symbol_table)
+        self.splitter.addWidget(right_container)
         
         # Connections
         self.interpreter.command_executed.connect(self.symbol_table.refresh)

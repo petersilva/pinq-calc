@@ -1,5 +1,5 @@
 import unittest
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QLabel
 from pinq.main import MainWindow
 from pinq.keypad import KeypadWidget
 
@@ -10,6 +10,12 @@ class TestKeypadAndWindow(unittest.TestCase):
         window = MainWindow()
         self.assertEqual(window.width(), 750)
         self.assertEqual(window.height(), 750)
+
+    def test_right_column_header(self):
+        window = MainWindow()
+        labels = [w.text() for w in window.findChildren(QLabel)]
+        self.assertIn("User Defined", labels)
+        self.assertIn("Math Module", labels)
 
     def test_keypad_labels_omit_open_paren(self):
         keypad = KeypadWidget()
