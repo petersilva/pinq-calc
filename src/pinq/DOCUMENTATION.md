@@ -4,7 +4,7 @@ Pinq-calc: calculate things obviously, it turns out to be python.
 
 ## Introduction
 
-Python is a very way to write calculations, so a computer can compute results.
+Python is a very natural way for humans to write simple calculations so a computer can compute results.
 For those learning Python, or who like Python, or people who want a
 calculator that is just a little more powerful than standard calculator apps.
 This app acts like calculator, but also like a python interpreter, with 
@@ -84,6 +84,5 @@ or you can hide those, and use a standard computer keyboard & keypad.
 ## Contributions
 
 This was just something I personally wanted. Suggestions and Contributions welcome.
+It was entirely written using Gemini, guided by my taste, such as it is.
 The home is: https://github.com/petersilva/pinq-calc
-
-

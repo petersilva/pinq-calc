@@ -53,14 +53,36 @@ class TestKeypadAndWindow(unittest.TestCase):
         keypad = KeypadWidget()
         buttons = keypad.findChildren(type(keypad.children()[1]))
         labels = [btn.text() for btn in buttons if hasattr(btn, 'text')]
-        # Check that sqrt, () are present, but sin, cos, tan, pi, e are removed
-        self.assertIn('sqrt', labels)
+        # Check that hex, oct, () are present, but sqrt, sin, cos, tan, pi, e are omitted
+        self.assertIn('hex', labels)
+        self.assertIn('oct', labels)
         self.assertIn('()', labels)
+        self.assertNotIn('sqrt', labels)
         self.assertNotIn('sin', labels)
         self.assertNotIn('cos', labels)
         self.assertNotIn('tan', labels)
         self.assertNotIn('π', labels)
         self.assertNotIn('e', labels)
+
+    def test_keypad_hex_and_oct_buttons(self):
+        window = MainWindow()
+        window.show()
+        interpreter = window.interpreter
+        keypad = window.keypad
+
+        buttons = {btn.text(): btn for btn in keypad.findChildren(type(keypad.children()[1])) if hasattr(btn, 'text')}
+        self.assertIn('hex', buttons)
+        self.assertIn('oct', buttons)
+
+        # Click 'hex' button
+        buttons['hex'].click()
+        self.assertEqual(interpreter.get_current_line(), "hex()")
+
+        interpreter.replace_current_line("")
+
+        # Click 'oct' button
+        buttons['oct'].click()
+        self.assertEqual(interpreter.get_current_line(), "oct()")
 
     def test_interpreter_append_text_positions_cursor(self):
         window = MainWindow()

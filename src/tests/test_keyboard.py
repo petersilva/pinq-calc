@@ -73,6 +73,12 @@ class TestKeyboardWidgetAndWindow(unittest.TestCase):
         emitted = []
         keyboard.key_pressed.connect(emitted.append)
 
+        # Test parenthesis buttons
+        self.assertIn('(', keyboard.buttons)
+        self.assertIn(')', keyboard.buttons)
+        keyboard.buttons[')'].click()
+        self.assertEqual(emitted[-1], ')')
+
         # Test lowercase
         keyboard.buttons['a'].click()
         self.assertEqual(emitted[-1], 'a')
