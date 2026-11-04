@@ -15,7 +15,7 @@ class TestKeypadAndWindow(unittest.TestCase):
         window = MainWindow()
         labels = [w.text() for w in window.findChildren(QLabel)]
         self.assertIn("User Defined", labels)
-        self.assertIn("Math Module", labels)
+        self.assertIn("Modules", labels)
 
     def test_keypad_toggle_button(self):
         window = MainWindow()

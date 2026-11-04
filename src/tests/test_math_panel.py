@@ -7,6 +7,15 @@ from pinq.math_panel import MathModuleWidget
 app = QApplication.instance() or QApplication([])
 
 class TestMathModulePanel(unittest.TestCase):
+    def test_tabs_exist(self):
+        panel = MathModuleWidget()
+        tab_widget = panel.tab_widget
+        self.assertIsNotNone(tab_widget)
+        tab_titles = [tab_widget.tabText(i) for i in range(tab_widget.count())]
+        self.assertIn("Math", tab_titles)
+        self.assertIn("NumPy", tab_titles)
+        self.assertIn("Pandas", tab_titles)
+
     def test_math_panel_buttons_exist(self):
         panel = MathModuleWidget()
         buttons = panel.findChildren(QPushButton)

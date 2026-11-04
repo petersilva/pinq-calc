@@ -16,6 +16,22 @@ class PythonSession:
         # Pre-import math symbols
         self.locals.update({k: v for k, v in vars(math).items() if not k.startswith('_')})
         
+        # Pre-import numpy as np if available
+        try:
+            import numpy as np
+            self.locals['np'] = np
+            self.locals['numpy'] = np
+        except ImportError:
+            pass
+
+        # Pre-import pandas as pd if available
+        try:
+            import pandas as pd
+            self.locals['pd'] = pd
+            self.locals['pandas'] = pd
+        except ImportError:
+            pass
+
         # Add a clear function to the namespace
         self.locals['clear'] = self.reset
         
@@ -107,6 +123,7 @@ class PythonSession:
         ignored = set(vars(math).keys())
         ignored.add('__builtins__')
         ignored.add('clear')
+        ignored.update(['np', 'numpy', 'pd', 'pandas'])
         
         return {k: v for k, v in self.locals.items() if k not in ignored and not k.startswith('_')}
 

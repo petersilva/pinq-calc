@@ -113,6 +113,26 @@ PINK_THEME = """
         color: #2D2D2D;
         border: 1px solid #FFC0CB;
     }
+    QTabWidget::pane {
+        border: 1px solid #FFC0CB;
+        background-color: #FFF0F5;
+    }
+    QTabBar::tab {
+        background-color: #FFE4E1;
+        color: #2D2D2D;
+        border: 1px solid #FFC0CB;
+        padding: 4px 8px;
+        font-weight: bold;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+    }
+    QTabBar::tab:selected {
+        background-color: #FFD1DC;
+        border-bottom-color: #FFD1DC;
+    }
+    QTabBar::tab:hover {
+        background-color: #FFC0CB;
+    }
 """
 
 class MainWindow(QMainWindow):
