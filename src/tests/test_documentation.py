@@ -1,11 +1,17 @@
 import os
 import unittest
 from PySide6.QtWidgets import QApplication
-from pinq.main import MainWindow, get_documentation_text
+from pinq.main import MainWindow, get_documentation_text, get_app_icon
 
 app = QApplication.instance() or QApplication([])
 
 class TestDocumentation(unittest.TestCase):
+    def test_get_app_icon(self):
+        icon = get_app_icon()
+        self.assertFalse(icon.isNull())
+        window = MainWindow()
+        self.assertFalse(window.windowIcon().isNull())
+
     def test_get_documentation_text(self):
         doc = get_documentation_text()
         self.assertIn("Pinq-calc Documentation", doc)

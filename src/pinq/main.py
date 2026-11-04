@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QSplitter, QFileDialog, QMessageBox,
                              QDialog, QTextEdit, QPushButton, QLabel)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QCloseEvent
+from PySide6.QtGui import QAction, QCloseEvent, QIcon
 
 from pinq._version import __version__
 from pinq.session import PythonSession
@@ -14,6 +14,49 @@ from pinq.symbols import SymbolTableWidget
 from pinq.keypad import KeypadWidget
 from pinq.math_panel import MathModuleWidget
 from pinq.keyboard import KeyboardWidget
+
+def get_app_icon() -> QIcon:
+    """Reads and returns the application QIcon from icon.png."""
+    icon_path = os.path.join(os.path.dirname(__file__), "icon.png")
+    if os.path.exists(icon_path):
+        return QIcon(icon_path)
+    return QIcon()
+
+def ensure_desktop_integration():
+    """Installs XDG .desktop file and icon for Wayland / X11 taskbar integration on Linux."""
+    if not sys.platform.startswith("linux"):
+        return
+        
+    try:
+        home = os.path.expanduser("~")
+        apps_dir = os.path.join(home, ".local", "share", "applications")
+        icons_dir = os.path.join(home, ".local", "share", "icons", "hicolor", "128x128", "apps")
+        os.makedirs(apps_dir, exist_ok=True)
+        os.makedirs(icons_dir, exist_ok=True)
+        
+        target_icon = os.path.join(icons_dir, "pinq-calc.png")
+        source_icon = os.path.join(os.path.dirname(__file__), "icon.png")
+            
+        if os.path.exists(source_icon):
+            import shutil
+            shutil.copy2(source_icon, target_icon)
+            
+        desktop_file = os.path.join(apps_dir, "pinq-calc.desktop")
+        desktop_content = (
+            "[Desktop Entry]\n"
+            "Type=Application\n"
+            "Name=Pinq-calc\n"
+            "Comment=Python Interpreted Nifty Qt Calculator\n"
+            "Exec=pinq-calc\n"
+            f"Icon={target_icon if os.path.exists(target_icon) else 'pinq-calc'}\n"
+            "Terminal=false\n"
+            "Categories=Utility;Calculator;\n"
+            "StartupWMClass=pinq-calc\n"
+        )
+        with open(desktop_file, "w", encoding="utf-8") as f:
+            f.write(desktop_content)
+    except Exception as e:
+        print(f"Failed to setup desktop integration: {e}")
 
 def get_documentation_text() -> str:
     """Reads and returns the contents of DOCUMENTATION.md."""
@@ -76,6 +119,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Pinq-Calc (Python Interpreted Nifty Qt Calculator)")
+        self.setWindowIcon(get_app_icon())
         self.resize(750, 750)
 
         self.session = PythonSession()
@@ -452,8 +496,12 @@ class MainWindow(QMainWindow):
 
 def main():
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    ensure_desktop_integration()
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    app.setApplicationName("pinq-calc")
+    app.setDesktopFileName("pinq-calc")
+    app.setWindowIcon(get_app_icon())
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
