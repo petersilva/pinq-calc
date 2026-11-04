@@ -1,0 +1,9 @@
+*.egg-info
+dist
+*.egg
+*.debhelper
+*.debhelper.log
+*.vscode
+*.pyc
+__pycache__
+

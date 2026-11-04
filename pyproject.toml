@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pinq-calc"
+version = "0.0.1"
+authors = [
+  { name="Peter", email="peter@example.com" },
+]
+description = "Pinq-calc (Python Interpreter Nifty Qt Calculator) - A portable GUI calculator with an integrated Python terminal."
+readme = "Requirements.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GPL-2.0-only", 
+    "Operating System :: OS Independent",
+    "Environment :: X11 Applications :: Qt",
+]
+dependencies = [
+    "PySide6>=6.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/petersilva/pinq-cal"
+
+[project.scripts]
+pinq-calc = "pinq.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

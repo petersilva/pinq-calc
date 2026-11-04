@@ -1,0 +1,73 @@
+# Pinq-calc Documentation
+
+Pinq-calc: calculate things obviously, it turns out to be python.
+
+## Introduction
+
+For those learning Python, or who like Python, or people who want a
+calculator that is just a little more powerful than standard calculator apps.
+This app acts like calculator, but also like a python interpreter, with 
+some small wrinkles to make it more intuitive to use as a calculator.
+
+Can use on-screen keypad, or standard computer keyboard & keypad (no mouse needed for calculations.)
+
+## Terminal
+- Type any Python expression or statement at the **>>>** prompt.
+- The **Enter** key acts like an *=* on a traditional calculator, just as in python.
+- Mathematical expressions (e.g., `2 + 2`) are evaluated immediately.
+- The python **math** library is pre-imported. Use `sin()`, `cos()`, `pi`, `sqrt()`, etc.
+- Use **Up/Down** arrows for command history.
+- Type `clear()` to reset the session.
+- Type 'quit()' to exit.
+- if you have a long series of calculations, the old results scroll off the top, and the 
+  interpreter window becomes scrollable, so you can still go back and see them.
+
+## Math Module Column
+
+- python has a standard module accessed using *import math* in python interpreters.
+- The middle *Math Module* column has buttons for each of the entitites defined by the python math module.
+- For detailed documentation, look into documentation for that module. (https://docs.python.org/3/library/math.html)
+
+
+## User Defined Variables and functions
+- type an assignment in python, like *p=3* and in the right side column, a *p* button will be created, with the value 3.
+- You can now change the value of p by clicking on the number.
+- You can still change the value of p in the interpreter, say *p=25*
+- You can also define python functions as you would in a python interpreter:
+     ```
+
+      def doublen(n):
+          return 2*n
+
+     ```
+     now you have a key labelled doublen and it can invoked like any other button
+  
+## Keypad
+- Use the on-screen buttons for digits and operators.
+- The **clear** button resets the entire session.
+
+## Symbol Table
+- **Variables**: Double-click to edit values inline.
+- **Functions**: Double-click to open the code editor.
+
+## Sessions
+
+- if you make some functions and variable your would like to save for later, you can save it to a session file.
+- Using the Menu: File/Save As... or Save
+- The file is plain python (with a .py suffix).
+- The app will remember the last session and reload it automatically.
+
+
+## Settings
+- Toggle between **Pinq Pink** and **System Colours** in the `File -> Settings` menu.
+
+
+## Installation
+
+
+* from PIP:
+  * pip install pinq-calc
+
+* from Source:
+  * pip install -e . --break-system-packages
+
