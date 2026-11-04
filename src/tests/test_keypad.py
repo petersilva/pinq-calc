@@ -17,6 +17,38 @@ class TestKeypadAndWindow(unittest.TestCase):
         self.assertIn("User Defined", labels)
         self.assertIn("Math Module", labels)
 
+    def test_keypad_toggle_button(self):
+        window = MainWindow()
+        window.show()
+        self.assertTrue(window.keypad.isVisible())
+        self.assertEqual(window.keypad_toggle_btn.text(), "▼ Keypad")
+
+        # Click toggle button to hide keypad
+        window.keypad_toggle_btn.click()
+        self.assertTrue(window.keypad.isHidden())
+        self.assertEqual(window.keypad_toggle_btn.text(), "▲ Keypad")
+
+        # Click toggle button to show keypad again
+        window.keypad_toggle_btn.click()
+        self.assertFalse(window.keypad.isHidden())
+        self.assertEqual(window.keypad_toggle_btn.text(), "▼ Keypad")
+
+    def test_keypad_view_menu_action(self):
+        window = MainWindow()
+        window.show()
+        self.assertTrue(window.show_keypad_action.isChecked())
+        self.assertTrue(window.keypad.isVisible())
+
+        # Trigger view action to hide keypad
+        window.show_keypad_action.trigger()
+        self.assertTrue(window.keypad.isHidden())
+        self.assertEqual(window.keypad_toggle_btn.text(), "▲ Keypad")
+
+        # Trigger view action to show keypad
+        window.show_keypad_action.trigger()
+        self.assertFalse(window.keypad.isHidden())
+        self.assertEqual(window.keypad_toggle_btn.text(), "▼ Keypad")
+
     def test_keypad_labels_omit_open_paren(self):
         keypad = KeypadWidget()
         buttons = keypad.findChildren(type(keypad.children()[1]))

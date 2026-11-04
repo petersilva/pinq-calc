@@ -45,6 +45,7 @@ Can use on-screen keypad, or standard computer keyboard & keypad (no mouse neede
 ## Keypad
 - Use the on-screen buttons for digits and operators.
 - The **clear** button resets the entire session.
+- Click the button (**▼ Keypad** / **▲ Keypad**) at the bottom of the left column (or use **View -> Show Keypad**) to toggle keypad visibility. When hidden, the interpreter expands to fill the left column.
 
 ## Symbol Table
 - **Variables**: Double-click to edit values inline.

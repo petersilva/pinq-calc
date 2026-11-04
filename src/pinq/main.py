@@ -53,6 +53,14 @@ PINK_THEME = """
     QPushButton:pressed {
         background-color: #FFB6C1;
     }
+    QPushButton#keypad_toggle_btn {
+        background-color: #FFE4E1;
+        color: #2D2D2D;
+        border: 1px solid #FFC0CB;
+        border-radius: 2px;
+        font-size: 11px;
+        padding: 1px;
+    }
     QSplitter::handle {
         background-color: #FFD1DC;
     }
@@ -74,20 +82,25 @@ class MainWindow(QMainWindow):
         self.auto_save_file = os.path.expanduser("~/.pinq_session.py")
         self.config_file = os.path.expanduser("~/.pinq_config.ini")
         self.use_system_colors = False
+        self.show_keypad = True
 
         self.load_config()
         self.init_ui()
         self.create_menus()
         self.apply_theme()
+        self.set_keypad_visible(self.show_keypad)
         self.load_auto_session()
 
     def load_config(self):
+        self.show_keypad = True
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r') as f:
                     for line in f:
                         if line.startswith("use_system_colors="):
                             self.use_system_colors = line.strip().split('=')[1].lower() == 'true'
+                        elif line.startswith("show_keypad="):
+                            self.show_keypad = line.strip().split('=')[1].lower() == 'true'
             except Exception as e:
                 print(f"Failed to load config: {e}")
 
@@ -95,8 +108,28 @@ class MainWindow(QMainWindow):
         try:
             with open(self.config_file, 'w') as f:
                 f.write(f"use_system_colors={self.use_system_colors}\n")
+                f.write(f"show_keypad={self.show_keypad}\n")
         except Exception as e:
             print(f"Failed to save config: {e}")
+
+    def toggle_keypad(self):
+        visible = not self.keypad.isVisible()
+        self.set_keypad_visible(visible)
+
+    def set_keypad_visible(self, visible: bool):
+        self.keypad.setVisible(visible)
+        if visible:
+            self.keypad_toggle_btn.setText("▼ Keypad")
+            self.keypad_toggle_btn.setToolTip("Click to hide keypad")
+        else:
+            self.keypad_toggle_btn.setText("▲ Keypad")
+            self.keypad_toggle_btn.setToolTip("Click to show keypad")
+        
+        if hasattr(self, 'show_keypad_action'):
+            self.show_keypad_action.setChecked(visible)
+            
+        self.show_keypad = visible
+        self.save_config()
 
     def apply_theme(self):
         if self.use_system_colors:
@@ -117,6 +150,8 @@ class MainWindow(QMainWindow):
         # Left Side Container
         left_container = QWidget()
         left_layout = QVBoxLayout(left_container)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(2)
         
         # Interpreter
         self.interpreter = InterpreterWidget(self.session, self)
@@ -125,6 +160,15 @@ class MainWindow(QMainWindow):
         # Keypad
         self.keypad = KeypadWidget(self)
         left_layout.addWidget(self.keypad, 1)
+
+        # Keypad Toggle Bar at bottom of left-hand column
+        self.keypad_toggle_btn = QPushButton("▼ Keypad")
+        self.keypad_toggle_btn.setObjectName("keypad_toggle_btn")
+        self.keypad_toggle_btn.setToolTip("Click to hide/show keypad")
+        self.keypad_toggle_btn.setMaximumHeight(20)
+        self.keypad_toggle_btn.setCursor(Qt.PointingHandCursor)
+        self.keypad_toggle_btn.clicked.connect(self.toggle_keypad)
+        left_layout.addWidget(self.keypad_toggle_btn, 0)
 
         # Middle Side Container (Math Module Panel)
         self.math_panel = MathModuleWidget(self)
@@ -199,6 +243,14 @@ class MainWindow(QMainWindow):
         quit_action.setShortcut("Ctrl+Q")
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
+
+        # View Menu
+        view_menu = menubar.addMenu("&View")
+        self.show_keypad_action = QAction("Show &Keypad", self, checkable=True)
+        self.show_keypad_action.setShortcut("Ctrl+K")
+        self.show_keypad_action.setChecked(self.show_keypad)
+        self.show_keypad_action.triggered.connect(lambda checked: self.set_keypad_visible(checked))
+        view_menu.addAction(self.show_keypad_action)
 
         # Help Menu
         help_menu = menubar.addMenu("&Help")
