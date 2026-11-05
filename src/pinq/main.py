@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Pinq-Calc (Python Interpreted Nifty Qt Calculator)")
         self.setWindowIcon(get_app_icon())
-        self.resize(750, 750)
+        self.resize(840, 750)
 
         self.session = PythonSession()
         self.current_file = None
@@ -329,7 +329,7 @@ class MainWindow(QMainWindow):
         self.splitter.setStretchFactor(2, 2)
         
         # Set initial sizes to ensure clean split across 3 columns
-        self.splitter.setSizes([320, 210, 220])
+        self.splitter.setSizes([220, 300, 220])
 
     def create_menus(self):
         menubar = self.menuBar()

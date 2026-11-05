@@ -16,7 +16,7 @@ def create_module_scroll_grid(module_obj, prefix, on_click_signal):
     grid_layout.setContentsMargins(5, 5, 5, 5)
     grid_layout.setSpacing(5)
     
-    cols = 2
+    cols = 3
     row = 0
     col = 0
     
