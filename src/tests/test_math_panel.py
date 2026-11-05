@@ -2,7 +2,8 @@ import unittest
 from unittest.mock import patch
 import math
 from PySide6.QtWidgets import QApplication, QPushButton
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import Qt, QUrl, QEvent, QPointF
+from PySide6.QtGui import QMouseEvent
 from pinq.main import MainWindow
 from pinq.math_panel import MathModuleWidget, MODULE_DOC_URLS
 
@@ -44,15 +45,47 @@ class TestMathModulePanel(unittest.TestCase):
         panel = MathModuleWidget()
         self.assertEqual(panel.tab_widget.tabBar().cursor().shape(), Qt.PointingHandCursor)
 
-    def test_tab_click_opens_documentation(self):
+    def test_tab_right_click_opens_documentation(self):
         panel = MathModuleWidget()
         tab_widget = panel.tab_widget
+        tab_bar = tab_widget.tabBar()
         with patch("pinq.math_panel.QDesktopServices.openUrl") as mock_open_url:
             for idx in range(tab_widget.count()):
                 title = tab_widget.tabText(idx)
                 expected_url = MODULE_DOC_URLS[title]
-                tab_widget.tabBarClicked.emit(idx)
+                tab_bar.tabRightClicked.emit(idx)
                 mock_open_url.assert_called_with(QUrl(expected_url))
+
+    def test_tab_selection_does_not_open_documentation(self):
+        panel = MathModuleWidget()
+        tab_widget = panel.tab_widget
+        with patch("pinq.math_panel.QDesktopServices.openUrl") as mock_open_url:
+            for idx in range(tab_widget.count()):
+                tab_widget.setCurrentIndex(idx)
+                mock_open_url.assert_not_called()
+
+    def test_tab_mouse_press_events(self):
+        panel = MathModuleWidget()
+        tab_widget = panel.tab_widget
+        tab_bar = tab_widget.tabBar()
+
+        with patch("pinq.math_panel.QDesktopServices.openUrl") as mock_open_url:
+            rect = tab_bar.tabRect(1)
+            pos = rect.center()
+            pos_f = QPointF(pos)
+
+            # Right click on tab index 1 (NumPy) -> opens documentation
+            right_evt = QMouseEvent(QEvent.MouseButtonPress, pos_f, pos_f, Qt.RightButton, Qt.RightButton, Qt.NoModifier)
+            tab_bar.mousePressEvent(right_evt)
+            mock_open_url.assert_called_with(QUrl(MODULE_DOC_URLS["NumPy"]))
+
+            mock_open_url.reset_mock()
+
+            # Left click on tab index 1 (NumPy) -> switches tab, does NOT open documentation
+            left_evt = QMouseEvent(QEvent.MouseButtonPress, pos_f, pos_f, Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
+            tab_bar.mousePressEvent(left_evt)
+            mock_open_url.assert_not_called()
+            self.assertEqual(tab_widget.currentIndex(), 1)
 
     def test_math_panel_buttons_exist(self):
         panel = MathModuleWidget()

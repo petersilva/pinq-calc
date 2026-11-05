@@ -1,7 +1,7 @@
 import math
 import types
 from PySide6.QtWidgets import (QWidget, QScrollArea, QGridLayout, QPushButton,
-                             QVBoxLayout, QLabel, QTabWidget)
+                             QVBoxLayout, QLabel, QTabWidget, QTabBar)
 from PySide6.QtCore import Signal, Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 
@@ -11,6 +11,19 @@ MODULE_DOC_URLS = {
     "Pandas": "https://pandas.pydata.org/docs/",
     "Matplotlib": "https://matplotlib.org/",
 }
+
+class ModuleTabBar(QTabBar):
+    tabRightClicked = Signal(int)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.RightButton:
+            pt = event.position().toPoint()
+            idx = self.tabAt(pt)
+            if idx >= 0:
+                self.tabRightClicked.emit(idx)
+                event.accept()
+                return
+        super().mousePressEvent(event)
 
 def create_module_scroll_grid(module_obj, prefix, on_click_signal):
     """Creates a scroll area with a grid of buttons for module exported symbols."""
@@ -92,7 +105,9 @@ class MathModuleWidget(QWidget):
         main_layout.addWidget(header)
 
         self.tab_widget = QTabWidget()
-        self.tab_widget.tabBar().setCursor(Qt.PointingHandCursor)
+        tab_bar = ModuleTabBar()
+        tab_bar.setCursor(Qt.PointingHandCursor)
+        self.tab_widget.setTabBar(tab_bar)
         main_layout.addWidget(self.tab_widget)
         
         self.lazy_tabs = {}
@@ -110,12 +125,12 @@ class MathModuleWidget(QWidget):
             title = self.tab_widget.tabText(idx)
             url = MODULE_DOC_URLS.get(title)
             if url:
-                self.tab_widget.setTabToolTip(idx, f"Documentation: {url}")
+                self.tab_widget.setTabToolTip(idx, f"Right-click for Documentation: {url}")
         
         self.tab_widget.currentChanged.connect(self._on_tab_changed)
-        self.tab_widget.tabBarClicked.connect(self._on_tab_bar_clicked)
+        tab_bar.tabRightClicked.connect(self._on_tab_right_clicked)
 
-    def _on_tab_bar_clicked(self, index):
+    def _on_tab_right_clicked(self, index):
         title = self.tab_widget.tabText(index)
         url = MODULE_DOC_URLS.get(title)
         if url:

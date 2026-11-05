@@ -35,7 +35,7 @@ of calculation logic.
 ## Modules Column (Math, NumPy, Pandas, Matplotlib)
 
 - The middle column features tabs for **Math**, **NumPy**, **Pandas**, and **Matplotlib**.
-- Tab titles in this column act as clickable links that open official documentation for each module in your web browser.
+- Primary click (left-click) on a tab title selects the module. Secondary click (right-click) opens official documentation for that module in your web browser.
 - The **Math** tab provides buttons for functions and constants in Python's standard `math` module.
 - The **NumPy**, **Pandas**, and **Matplotlib** tabs provide interactive buttons for top-level entry points (`np.array()`, `pd.DataFrame()`, `plt.plot()`, etc.) when those libraries are installed.
 - Clicking any button inserts the function or symbol directly into the interpreter.
