@@ -86,13 +86,13 @@ class MathModuleWidget(QWidget):
         self.tab_widget = QTabWidget()
         main_layout.addWidget(self.tab_widget)
         
-        self.tab_builders = {}
+        self.lazy_tabs = {}
         
         # Tab 1: Math (built immediately)
         math_tab = create_module_scroll_grid(math, "", self.button_clicked)
         self.tab_widget.addTab(math_tab, "Math")
         
-        # Tabs 2-4: Lazy-loaded on tab selection
+        # Tabs 2-4: Lazy container tabs
         self._add_lazy_tab("NumPy", self._build_numpy_tab)
         self._add_lazy_tab("Pandas", self._build_pandas_tab)
         self._add_lazy_tab("Matplotlib", self._build_matplotlib_tab)
@@ -100,24 +100,19 @@ class MathModuleWidget(QWidget):
         self.tab_widget.currentChanged.connect(self._on_tab_changed)
 
     def _add_lazy_tab(self, title, builder_fn):
-        placeholder = QWidget()
-        index = self.tab_widget.addTab(placeholder, title)
-        self.tab_builders[index] = [builder_fn, False]
+        container = QWidget()
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        index = self.tab_widget.addTab(container, title)
+        self.lazy_tabs[index] = (container, builder_fn, False)
 
     def _on_tab_changed(self, index):
-        if index in self.tab_builders:
-            builder_info = self.tab_builders[index]
-            builder_fn, populated = builder_info[0], builder_info[1]
+        if index in self.lazy_tabs:
+            container, builder_fn, populated = self.lazy_tabs[index]
             if not populated:
-                title = self.tab_widget.tabText(index)
-                new_widget = builder_fn()
-                old_widget = self.tab_widget.widget(index)
-                self.tab_widget.removeTab(index)
-                self.tab_widget.insertTab(index, new_widget, title)
-                self.tab_widget.setCurrentIndex(index)
-                builder_info[1] = True
-                if old_widget:
-                    old_widget.deleteLater()
+                widget = builder_fn()
+                container.layout().addWidget(widget)
+                self.lazy_tabs[index] = (container, builder_fn, True)
 
     def _build_numpy_tab(self):
         try:

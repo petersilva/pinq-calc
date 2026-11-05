@@ -17,6 +17,14 @@ class TestMathModulePanel(unittest.TestCase):
         self.assertIn("Pandas", tab_titles)
         self.assertIn("Matplotlib", tab_titles)
 
+    def test_switching_tabs(self):
+        panel = MathModuleWidget()
+        tab_widget = panel.tab_widget
+        # Switch to NumPy (index 1), Pandas (index 2), Matplotlib (index 3)
+        for idx in range(tab_widget.count()):
+            tab_widget.setCurrentIndex(idx)
+            self.assertEqual(tab_widget.currentIndex(), idx)
+
     def test_math_panel_buttons_exist(self):
         panel = MathModuleWidget()
         buttons = panel.findChildren(QPushButton)
