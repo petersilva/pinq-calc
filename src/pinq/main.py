@@ -136,7 +136,7 @@ PINK_THEME = """
 """
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, config_file=None):
         super().__init__()
         self.setWindowTitle("Pinq-Calc (Python Interpreted Nifty Qt Calculator)")
         self.setWindowIcon(get_app_icon())
@@ -145,7 +145,7 @@ class MainWindow(QMainWindow):
         self.session = PythonSession()
         self.current_file = None
         self.auto_save_file = os.path.expanduser("~/.pinq_session.py")
-        self.config_file = os.path.expanduser("~/.pinq_config.ini")
+        self.config_file = config_file if config_file is not None else os.path.expanduser("~/.pinq_config.ini")
         self.use_system_colors = False
         self.show_keypad = True
         self.show_keyboard = False

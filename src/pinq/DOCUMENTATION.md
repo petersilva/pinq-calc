@@ -27,11 +27,11 @@ or you can hide those, and use a standard computer keyboard & keypad.
 - To store values, create a python assignment statement:  LengthOfThing=34.5
   You then have a LengthOfThing button you can use for inclusion in later calculations.
 
-## Modules Column (Math, NumPy, Pandas)
+## Modules Column (Math, NumPy, Pandas, Matplotlib)
 
-- The middle column features tabs for **Math**, **NumPy**, and **Pandas**.
+- The middle column features tabs for **Math**, **NumPy**, **Pandas**, and **Matplotlib**.
 - The **Math** tab provides buttons for functions and constants in Python's standard `math` module.
-- The **NumPy** and **Pandas** tabs provide interactive buttons for top-level entry points (`np.array()`, `pd.DataFrame()`, etc.) when those libraries are installed.
+- The **NumPy**, **Pandas**, and **Matplotlib** tabs provide interactive buttons for top-level entry points (`np.array()`, `pd.DataFrame()`, `plt.plot()`, etc.) when those libraries are installed.
 - Clicking any button inserts the function or symbol directly into the interpreter.
 
 

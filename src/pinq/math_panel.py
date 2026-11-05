@@ -86,22 +86,56 @@ class MathModuleWidget(QWidget):
         self.tab_widget = QTabWidget()
         main_layout.addWidget(self.tab_widget)
         
-        # Tab 1: Math
+        self.tab_builders = {}
+        
+        # Tab 1: Math (built immediately)
         math_tab = create_module_scroll_grid(math, "", self.button_clicked)
         self.tab_widget.addTab(math_tab, "Math")
         
-        # Tab 2: NumPy
+        # Tabs 2-4: Lazy-loaded on tab selection
+        self._add_lazy_tab("NumPy", self._build_numpy_tab)
+        self._add_lazy_tab("Pandas", self._build_pandas_tab)
+        self._add_lazy_tab("Matplotlib", self._build_matplotlib_tab)
+        
+        self.tab_widget.currentChanged.connect(self._on_tab_changed)
+
+    def _add_lazy_tab(self, title, builder_fn):
+        placeholder = QWidget()
+        index = self.tab_widget.addTab(placeholder, title)
+        self.tab_builders[index] = [builder_fn, False]
+
+    def _on_tab_changed(self, index):
+        if index in self.tab_builders:
+            builder_info = self.tab_builders[index]
+            builder_fn, populated = builder_info[0], builder_info[1]
+            if not populated:
+                title = self.tab_widget.tabText(index)
+                new_widget = builder_fn()
+                old_widget = self.tab_widget.widget(index)
+                self.tab_widget.removeTab(index)
+                self.tab_widget.insertTab(index, new_widget, title)
+                self.tab_widget.setCurrentIndex(index)
+                builder_info[1] = True
+                if old_widget:
+                    old_widget.deleteLater()
+
+    def _build_numpy_tab(self):
         try:
             import numpy as np
-            numpy_tab = create_module_scroll_grid(np, "np.", self.button_clicked)
+            return create_module_scroll_grid(np, "np.", self.button_clicked)
         except ImportError:
-            numpy_tab = create_not_installed_widget("NumPy", "pip install numpy")
-        self.tab_widget.addTab(numpy_tab, "NumPy")
-        
-        # Tab 3: Pandas
+            return create_not_installed_widget("NumPy", "pip install numpy")
+
+    def _build_pandas_tab(self):
         try:
             import pandas as pd
-            pandas_tab = create_module_scroll_grid(pd, "pd.", self.button_clicked)
+            return create_module_scroll_grid(pd, "pd.", self.button_clicked)
         except ImportError:
-            pandas_tab = create_not_installed_widget("Pandas", "pip install pandas")
-        self.tab_widget.addTab(pandas_tab, "Pandas")
+            return create_not_installed_widget("Pandas", "pip install pandas")
+
+    def _build_matplotlib_tab(self):
+        try:
+            import matplotlib.pyplot as plt
+            return create_module_scroll_grid(plt, "plt.", self.button_clicked)
+        except ImportError:
+            return create_not_installed_widget("Matplotlib", "pip install matplotlib")

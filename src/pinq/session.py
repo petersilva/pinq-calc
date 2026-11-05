@@ -32,6 +32,15 @@ class PythonSession:
         except ImportError:
             pass
 
+        # Pre-import matplotlib.pyplot as plt if available
+        try:
+            import matplotlib
+            import matplotlib.pyplot as plt
+            self.locals['plt'] = plt
+            self.locals['matplotlib'] = matplotlib
+        except ImportError:
+            pass
+
         # Add a clear function to the namespace
         self.locals['clear'] = self.reset
         
@@ -123,7 +132,7 @@ class PythonSession:
         ignored = set(vars(math).keys())
         ignored.add('__builtins__')
         ignored.add('clear')
-        ignored.update(['np', 'numpy', 'pd', 'pandas'])
+        ignored.update(['np', 'numpy', 'pd', 'pandas', 'plt', 'matplotlib'])
         
         return {k: v for k, v in self.locals.items() if k not in ignored and not k.startswith('_')}
 

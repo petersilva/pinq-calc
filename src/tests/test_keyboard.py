@@ -1,13 +1,19 @@
+import tempfile, os
 import unittest
 from PySide6.QtWidgets import QApplication
 from pinq.main import MainWindow
 from pinq.keyboard import KeyboardWidget
 
 app = QApplication.instance() or QApplication([])
+TEST_CONFIG = os.path.join(tempfile.gettempdir(), "pinq_test_keyboard_config.ini")
 
 class TestKeyboardWidgetAndWindow(unittest.TestCase):
+    def setUp(self):
+        if os.path.exists(TEST_CONFIG):
+            os.remove(TEST_CONFIG)
+
     def test_keyboard_default_hidden(self):
-        window = MainWindow()
+        window = MainWindow(config_file=TEST_CONFIG)
         window.show()
         # By default, on-screen keyboard should NOT be shown
         self.assertTrue(window.keyboard_panel.isHidden())
@@ -15,7 +21,7 @@ class TestKeyboardWidgetAndWindow(unittest.TestCase):
         self.assertFalse(window.show_keyboard_action.isChecked())
 
     def test_keyboard_toggle_button(self):
-        window = MainWindow()
+        window = MainWindow(config_file=TEST_CONFIG)
         window.show()
         self.assertTrue(window.keyboard_panel.isHidden())
 

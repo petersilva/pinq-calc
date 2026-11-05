@@ -15,6 +15,7 @@ class TestMathModulePanel(unittest.TestCase):
         self.assertIn("Math", tab_titles)
         self.assertIn("NumPy", tab_titles)
         self.assertIn("Pandas", tab_titles)
+        self.assertIn("Matplotlib", tab_titles)
 
     def test_math_panel_buttons_exist(self):
         panel = MathModuleWidget()

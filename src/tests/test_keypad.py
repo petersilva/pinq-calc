@@ -1,24 +1,32 @@
+import tempfile, os
 import unittest
 from PySide6.QtWidgets import QApplication, QLabel
 from pinq.main import MainWindow
 from pinq.keypad import KeypadWidget
 
 app = QApplication.instance() or QApplication([])
+TEST_CONFIG = os.path.join(tempfile.gettempdir(), "pinq_test_keypad_config.ini")
 
 class TestKeypadAndWindow(unittest.TestCase):
+    def setUp(self):
+        if os.path.exists(TEST_CONFIG):
+            os.remove(TEST_CONFIG)
+
     def test_window_size(self):
-        window = MainWindow()
+        window = MainWindow(config_file=TEST_CONFIG)
         self.assertEqual(window.width(), 750)
         self.assertEqual(window.height(), 750)
+        window.close()
 
     def test_right_column_header(self):
-        window = MainWindow()
+        window = MainWindow(config_file=TEST_CONFIG)
         labels = [w.text() for w in window.findChildren(QLabel)]
         self.assertIn("User Defined", labels)
         self.assertIn("Modules", labels)
+        window.close()
 
     def test_keypad_toggle_button(self):
-        window = MainWindow()
+        window = MainWindow(config_file=TEST_CONFIG)
         window.show()
         self.assertTrue(window.keypad.isVisible())
         self.assertEqual(window.keypad_toggle_btn.text(), "▼ Keypad")
@@ -32,9 +40,10 @@ class TestKeypadAndWindow(unittest.TestCase):
         window.keypad_toggle_btn.click()
         self.assertFalse(window.keypad.isHidden())
         self.assertEqual(window.keypad_toggle_btn.text(), "▼ Keypad")
+        window.close()
 
     def test_keypad_view_menu_action(self):
-        window = MainWindow()
+        window = MainWindow(config_file=TEST_CONFIG)
         window.show()
         self.assertTrue(window.show_keypad_action.isChecked())
         self.assertTrue(window.keypad.isVisible())
