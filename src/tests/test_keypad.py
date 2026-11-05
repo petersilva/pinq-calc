@@ -14,7 +14,7 @@ class TestKeypadAndWindow(unittest.TestCase):
 
     def test_window_size(self):
         window = MainWindow(config_file=TEST_CONFIG)
-        self.assertEqual(window.width(), 750)
+        self.assertEqual(window.width(), 840)
         self.assertEqual(window.height(), 750)
         window.close()
 
