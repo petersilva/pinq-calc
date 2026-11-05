@@ -4,7 +4,8 @@ Pinq-calc: calculate things obviously, it turns out to be python.
 
 ## Introduction
 
-Python is a very natural way for humans to write simple calculations so a computer can compute results.
+Python is a very natural way for humans to write simple calculations so a 
+computer can compute results. 
 For those learning Python, or who like Python, or people who want a
 calculator that is just a little more powerful than standard calculator apps.
 This app acts like calculator, but also like a python interpreter, with 
@@ -12,6 +13,10 @@ some small wrinkles to make it more intuitive to use as a calculator.
 
 Can use on-screen keypad & keyboard when touch makes more sense, 
 or you can hide those, and use a standard computer keyboard & keypad. 
+
+It's not meant to be a full python development environment, rather a small
+calculator for a few lines at a time. A sort of scratchpad for small pieces
+of calculation logic.
 
 ## Terminal
 - Type any Python expression or statement at the **>>>** prompt.
@@ -80,7 +85,7 @@ or you can hide those, and use a standard computer keyboard & keypad.
 * from PIP:
   * pip install pinq-calc
 
-* from Source:
+* from Source, to modify during development:
   * pip install -e . --break-system-packages
 
 ## Contributions
