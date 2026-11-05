@@ -2,6 +2,8 @@
 
 Pinq-calc: calculate things obviously, it turns out to be python.
 
+![pinq-calc Screenshot](https://github.com/petersilva/pinq-calc/blob/main/docs/pinq-calc-screenshot.jxl)
+
 ## Introduction
 
 Python is a very natural way for humans to write simple calculations so a 
