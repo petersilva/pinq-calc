@@ -1,8 +1,10 @@
 import unittest
+from unittest.mock import patch
 import math
 from PySide6.QtWidgets import QApplication, QPushButton
+from PySide6.QtCore import Qt, QUrl
 from pinq.main import MainWindow
-from pinq.math_panel import MathModuleWidget
+from pinq.math_panel import MathModuleWidget, MODULE_DOC_URLS
 
 app = QApplication.instance() or QApplication([])
 
@@ -24,6 +26,33 @@ class TestMathModulePanel(unittest.TestCase):
         for idx in range(tab_widget.count()):
             tab_widget.setCurrentIndex(idx)
             self.assertEqual(tab_widget.currentIndex(), idx)
+
+    def test_documentation_urls_and_tooltips(self):
+        panel = MathModuleWidget()
+        tab_widget = panel.tab_widget
+        expected_modules = ["Math", "NumPy", "Pandas", "Matplotlib"]
+        for mod in expected_modules:
+            self.assertIn(mod, MODULE_DOC_URLS)
+            self.assertTrue(MODULE_DOC_URLS[mod].startswith("https://"))
+
+        for idx in range(tab_widget.count()):
+            title = tab_widget.tabText(idx)
+            tooltip = tab_widget.tabToolTip(idx)
+            self.assertIn(MODULE_DOC_URLS[title], tooltip)
+
+    def test_tab_bar_cursor(self):
+        panel = MathModuleWidget()
+        self.assertEqual(panel.tab_widget.tabBar().cursor().shape(), Qt.PointingHandCursor)
+
+    def test_tab_click_opens_documentation(self):
+        panel = MathModuleWidget()
+        tab_widget = panel.tab_widget
+        with patch("pinq.math_panel.QDesktopServices.openUrl") as mock_open_url:
+            for idx in range(tab_widget.count()):
+                title = tab_widget.tabText(idx)
+                expected_url = MODULE_DOC_URLS[title]
+                tab_widget.tabBarClicked.emit(idx)
+                mock_open_url.assert_called_with(QUrl(expected_url))
 
     def test_math_panel_buttons_exist(self):
         panel = MathModuleWidget()

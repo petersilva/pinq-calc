@@ -2,7 +2,15 @@ import math
 import types
 from PySide6.QtWidgets import (QWidget, QScrollArea, QGridLayout, QPushButton,
                              QVBoxLayout, QLabel, QTabWidget)
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtCore import Signal, Qt, QUrl
+from PySide6.QtGui import QDesktopServices
+
+MODULE_DOC_URLS = {
+    "Math": "https://docs.python.org/3/library/math.html",
+    "NumPy": "https://numpy.org/doc/",
+    "Pandas": "https://pandas.pydata.org/docs/",
+    "Matplotlib": "https://matplotlib.org/",
+}
 
 def create_module_scroll_grid(module_obj, prefix, on_click_signal):
     """Creates a scroll area with a grid of buttons for module exported symbols."""
@@ -84,6 +92,7 @@ class MathModuleWidget(QWidget):
         main_layout.addWidget(header)
 
         self.tab_widget = QTabWidget()
+        self.tab_widget.tabBar().setCursor(Qt.PointingHandCursor)
         main_layout.addWidget(self.tab_widget)
         
         self.lazy_tabs = {}
@@ -97,7 +106,20 @@ class MathModuleWidget(QWidget):
         self._add_lazy_tab("Pandas", self._build_pandas_tab)
         self._add_lazy_tab("Matplotlib", self._build_matplotlib_tab)
         
+        for idx in range(self.tab_widget.count()):
+            title = self.tab_widget.tabText(idx)
+            url = MODULE_DOC_URLS.get(title)
+            if url:
+                self.tab_widget.setTabToolTip(idx, f"Documentation: {url}")
+        
         self.tab_widget.currentChanged.connect(self._on_tab_changed)
+        self.tab_widget.tabBarClicked.connect(self._on_tab_bar_clicked)
+
+    def _on_tab_bar_clicked(self, index):
+        title = self.tab_widget.tabText(index)
+        url = MODULE_DOC_URLS.get(title)
+        if url:
+            QDesktopServices.openUrl(QUrl(url))
 
     def _add_lazy_tab(self, title, builder_fn):
         container = QWidget()
