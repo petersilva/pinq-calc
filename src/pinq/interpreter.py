@@ -1,8 +1,8 @@
 import code
 import re
 from PySide6.QtWidgets import QTextEdit, QVBoxLayout, QWidget, QApplication
-from PySide6.QtCore import Qt, Signal, QEvent
-from PySide6.QtGui import QFont, QTextCursor
+from PySide6.QtCore import Qt, Signal, QEvent, QMimeData
+from PySide6.QtGui import QFont, QTextCursor, QKeySequence
 
 class InterpreterWidget(QTextEdit):
     command_executed = Signal()
@@ -22,6 +22,54 @@ class InterpreterWidget(QTextEdit):
         self.insertPlainText("Pinq-calc\n" + self.prompt)
         self.set_input_start()
 
+    def paste(self):
+        clipboard = QApplication.clipboard()
+        mime_data = clipboard.mimeData()
+        if mime_data:
+            self.insertFromMimeData(mime_data)
+
+    def insertFromMimeData(self, source):
+        if not source or not source.hasText():
+            super().insertFromMimeData(source)
+            return
+
+        cursor = self.textCursor()
+        if cursor.position() < self.input_start_pos:
+            self.moveCursor(QTextCursor.End)
+
+        text = source.text()
+        normalized = (
+            text.replace('\r\n', '\n')
+            .replace('\r', '\n')
+            .replace('\u2028', '\n')
+            .replace('\u2029', '\n')
+            .replace('\x0b', '\n')
+            .replace('\x0c', '\n')
+            .replace('\x85', '\n')
+        )
+
+        if '\n' in normalized:
+            lines = normalized.split('\n')
+            lines_to_execute = lines[:-1]
+            last_line = lines[-1]
+
+            for line in lines_to_execute:
+                self.moveCursor(QTextCursor.End)
+                cursor = self.textCursor()
+                cursor.insertText(line)
+                self.setTextCursor(cursor)
+                self.execute_current_line()
+
+            if last_line:
+                self.moveCursor(QTextCursor.End)
+                cursor = self.textCursor()
+                cursor.insertText(last_line)
+                self.setTextCursor(cursor)
+        else:
+            cursor = self.textCursor()
+            cursor.insertText(normalized)
+            self.setTextCursor(cursor)
+
     def set_input_start(self):
         """Mark the start of the current input line."""
         self.moveCursor(QTextCursor.End)
@@ -31,7 +79,16 @@ class InterpreterWidget(QTextEdit):
         cursor = self.textCursor()
         cursor.setPosition(self.input_start_pos)
         cursor.movePosition(QTextCursor.End, QTextCursor.KeepAnchor)
-        return cursor.selectedText()
+        text = cursor.selectedText()
+        return (
+            text.replace('\u2028', '\n')
+            .replace('\u2029', '\n')
+            .replace('\r\n', '\n')
+            .replace('\r', '\n')
+            .replace('\x0b', '\n')
+            .replace('\x0c', '\n')
+            .replace('\x85', '\n')
+        )
 
     def execute_current_line(self):
         self.moveCursor(QTextCursor.End)
@@ -46,6 +103,10 @@ class InterpreterWidget(QTextEdit):
         if cursor.position() < self.input_start_pos:
             self.moveCursor(QTextCursor.End)
             cursor = self.textCursor()
+
+        if event.matches(QKeySequence.StandardKey.Paste):
+            self.paste()
+            return
 
         if event.key() in (Qt.Key_Return, Qt.Key_Enter):
             self.execute_current_line()
@@ -77,6 +138,24 @@ class InterpreterWidget(QTextEdit):
         super().keyPressEvent(event)
 
     def process_command(self, text):
+        normalized = (
+            text.replace('\u2028', '\n')
+            .replace('\u2029', '\n')
+            .replace('\r\n', '\n')
+            .replace('\r', '\n')
+            .replace('\x0b', '\n')
+            .replace('\x0c', '\n')
+            .replace('\x85', '\n')
+        )
+
+        if '\n' in normalized:
+            lines = normalized.split('\n')
+            for line in lines:
+                self.process_command(line)
+            return
+
+        text = normalized
+
         if not text and not self.current_multiline:
             self.insertPlainText(self.prompt)
             self.set_input_start()
