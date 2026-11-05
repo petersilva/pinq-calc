@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pinq-calc"
-version = "0.0.1"
+dynamic = ["version"]
 authors = [
   { name="Peter", email="peter@bsqt.homeip.net" },
 ]
@@ -32,3 +32,6 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 pinq = ["*.md", "*.jpeg", "*.jpg", "*.png"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pinq._version.__version__"}
