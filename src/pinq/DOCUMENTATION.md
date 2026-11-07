@@ -83,6 +83,8 @@ of calculation logic.
 
 ## Installation
 
+go here: https://pypi.org/project/pinq-calc/
+short version:
 
 * from PIP:
   * pip install pinq-calc
