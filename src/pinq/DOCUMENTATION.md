@@ -65,6 +65,12 @@ of calculation logic.
 - Click the toggle bar (**▲ Keyboard** / **▼ Keyboard**) at the very bottom of the application (or use **View -> Show On-Screen Keyboard**) to display a full QWERTY keyboard spanning under all three columns.
 - Hidden by default. Includes shift, caps lock, backspace, navigation arrows, space, and clear keys.
 
+## Font Zooming & View Options
+- **Zoom In** (`Ctrl+` or `Ctrl+=`): Increase font and widget size.
+- **Zoom Out** (`Ctrl-`): Decrease font and widget size.
+- **Reset Zoom** (`Ctrl+0`): Reset font and widget size to default.
+- Zoom preferences are saved automatically across sessions.
+
 ## Symbol Table
 - **Variables**: Double-click to edit values inline.
 - **Functions**: Double-click to open the code editor.

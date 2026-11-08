@@ -4,8 +4,8 @@ import signal
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QSplitter, QFileDialog, QMessageBox,
                              QDialog, QTextEdit, QPushButton, QLabel)
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QCloseEvent, QIcon
+from PySide6.QtCore import Qt, QEvent
+from PySide6.QtGui import QAction, QCloseEvent, QIcon, QFont, QKeySequence
 
 from pinq._version import __version__
 from pinq.session import PythonSession
@@ -67,57 +67,60 @@ def get_documentation_text() -> str:
     except Exception as e:
         return f"# Pinq-Calc Documentation\n\nFailed to load documentation file: {e}"
 
-PINK_THEME = """
-    QMainWindow {
+def get_pink_theme(font_size_delta=0) -> str:
+    btn_size = max(8, 14 + font_size_delta)
+    toggle_size = max(7, 11 + font_size_delta)
+    return f"""
+    QMainWindow {{
         background-color: #FFF0F5;
-    }
-    QTableWidget {
+    }}
+    QTableWidget {{
         background-color: #FFF0F5;
         color: #2D2D2D;
         gridline-color: #E6E6E6;
         border: none;
-    }
-    QHeaderView::section {
+    }}
+    QHeaderView::section {{
         background-color: #FFD1DC;
         color: #2D2D2D;
         padding: 4px;
         border: 1px solid #E6E6E6;
-    }
-    QPushButton {
+    }}
+    QPushButton {{
         background-color: #FFE4E1;
         color: #2D2D2D;
         border: 1px solid #FFC0CB;
         border-radius: 4px;
-        font-size: 14px;
+        font-size: {btn_size}px;
         padding: 5px;
-    }
-    QPushButton:hover {
+    }}
+    QPushButton:hover {{
         background-color: #FFC0CB;
-    }
-    QPushButton:pressed {
+    }}
+    QPushButton:pressed {{
         background-color: #FFB6C1;
-    }
-    QPushButton#keypad_toggle_btn, QPushButton#keyboard_toggle_btn {
+    }}
+    QPushButton#keypad_toggle_btn, QPushButton#keyboard_toggle_btn {{
         background-color: #FFE4E1;
         color: #2D2D2D;
         border: 1px solid #FFC0CB;
         border-radius: 2px;
-        font-size: 11px;
+        font-size: {toggle_size}px;
         padding: 1px;
-    }
-    QSplitter::handle {
+    }}
+    QSplitter::handle {{
         background-color: #FFD1DC;
-    }
-    QTextEdit {
+    }}
+    QTextEdit {{
         background-color: #FFF0F5;
         color: #2D2D2D;
         border: 1px solid #FFC0CB;
-    }
-    QTabWidget::pane {
+    }}
+    QTabWidget::pane {{
         border: 1px solid #FFC0CB;
         background-color: #FFF0F5;
-    }
-    QTabBar::tab {
+    }}
+    QTabBar::tab {{
         background-color: #FFE4E1;
         color: #2D2D2D;
         border: 1px solid #FFC0CB;
@@ -125,14 +128,14 @@ PINK_THEME = """
         font-weight: bold;
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
-    }
-    QTabBar::tab:selected {
+    }}
+    QTabBar::tab:selected {{
         background-color: #FFD1DC;
         border-bottom-color: #FFD1DC;
-    }
-    QTabBar::tab:hover {
+    }}
+    QTabBar::tab:hover {{
         background-color: #FFC0CB;
-    }
+    }}
 """
 
 class MainWindow(QMainWindow):
@@ -154,13 +157,35 @@ class MainWindow(QMainWindow):
         self.init_ui()
         self.create_menus()
         self.apply_theme()
+        self.apply_font_zoom()
         self.set_keypad_visible(self.show_keypad)
         self.set_keyboard_visible(self.show_keyboard)
         self.load_auto_session()
 
+        app = QApplication.instance()
+        if app:
+            app.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress:
+            mods = event.modifiers()
+            if mods & Qt.ControlModifier:
+                key = event.key()
+                if key in (Qt.Key_Plus, Qt.Key_Equal):
+                    self.zoom_in()
+                    return True
+                elif key in (Qt.Key_Minus, Qt.Key_Underscore):
+                    self.zoom_out()
+                    return True
+                elif key == Qt.Key_0:
+                    self.reset_zoom()
+                    return True
+        return super().eventFilter(obj, event)
+
     def load_config(self):
         self.show_keypad = True
         self.show_keyboard = False
+        self.font_size_delta = 0
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r') as f:
@@ -171,6 +196,8 @@ class MainWindow(QMainWindow):
                             self.show_keypad = line.strip().split('=')[1].lower() == 'true'
                         elif line.startswith("show_keyboard="):
                             self.show_keyboard = line.strip().split('=')[1].lower() == 'true'
+                        elif line.startswith("font_size_delta="):
+                            self.font_size_delta = int(line.strip().split('=')[1])
             except Exception as e:
                 print(f"Failed to load config: {e}")
 
@@ -180,6 +207,7 @@ class MainWindow(QMainWindow):
                 f.write(f"use_system_colors={self.use_system_colors}\n")
                 f.write(f"show_keypad={self.show_keypad}\n")
                 f.write(f"show_keyboard={self.show_keyboard}\n")
+                f.write(f"font_size_delta={self.font_size_delta}\n")
         except Exception as e:
             print(f"Failed to save config: {e}")
 
@@ -246,7 +274,41 @@ class MainWindow(QMainWindow):
         if self.use_system_colors:
             QApplication.instance().setStyleSheet("")
         else:
-            QApplication.instance().setStyleSheet(PINK_THEME)
+            QApplication.instance().setStyleSheet(get_pink_theme(self.font_size_delta))
+
+    def apply_font_zoom(self):
+        app = QApplication.instance()
+        if app:
+            if not hasattr(self, 'initial_app_font_size'):
+                point_size = app.font().pointSize()
+                self.initial_app_font_size = point_size if point_size > 0 else 10
+            
+            font = app.font()
+            new_app_size = max(6, self.initial_app_font_size + self.font_size_delta)
+            font.setPointSize(new_app_size)
+            app.setFont(font)
+
+        self.apply_theme()
+            
+        if hasattr(self, 'interpreter') and self.interpreter:
+            new_interp_size = max(6, 10 + self.font_size_delta)
+            self.interpreter.set_font_size(new_interp_size)
+
+    def zoom_in(self):
+        self.font_size_delta += 1
+        self.apply_font_zoom()
+        self.save_config()
+
+    def zoom_out(self):
+        if (10 + self.font_size_delta) > 6:
+            self.font_size_delta -= 1
+            self.apply_font_zoom()
+            self.save_config()
+
+    def reset_zoom(self):
+        self.font_size_delta = 0
+        self.apply_font_zoom()
+        self.save_config()
 
     def init_ui(self):
         # Main Central Widget
@@ -384,6 +446,23 @@ class MainWindow(QMainWindow):
         self.show_keyboard_action.setChecked(self.show_keyboard)
         self.show_keyboard_action.triggered.connect(lambda checked: self.set_keyboard_visible(checked))
         view_menu.addAction(self.show_keyboard_action)
+
+        view_menu.addSeparator()
+
+        self.zoom_in_action = QAction("Zoom &In", self)
+        self.zoom_in_action.setShortcut("Ctrl++")
+        self.zoom_in_action.triggered.connect(self.zoom_in)
+        view_menu.addAction(self.zoom_in_action)
+
+        self.zoom_out_action = QAction("Zoom &Out", self)
+        self.zoom_out_action.setShortcut("Ctrl+-")
+        self.zoom_out_action.triggered.connect(self.zoom_out)
+        view_menu.addAction(self.zoom_out_action)
+
+        self.reset_zoom_action = QAction("&Reset Zoom", self)
+        self.reset_zoom_action.setShortcut("Ctrl+0")
+        self.reset_zoom_action.triggered.connect(self.reset_zoom)
+        view_menu.addAction(self.reset_zoom_action)
 
         # Help Menu
         help_menu = menubar.addMenu("&Help")

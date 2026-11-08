@@ -2,7 +2,7 @@ import code
 import re
 from PySide6.QtWidgets import QTextEdit, QVBoxLayout, QWidget, QApplication
 from PySide6.QtCore import Qt, Signal, QEvent, QMimeData
-from PySide6.QtGui import QFont, QTextCursor, QKeySequence
+from PySide6.QtGui import QFont, QTextCursor, QKeySequence, QTextCharFormat
 
 class InterpreterWidget(QTextEdit):
     command_executed = Signal()
@@ -21,6 +21,20 @@ class InterpreterWidget(QTextEdit):
         self.multiline_prompt = "... "
         self.insertPlainText("Pinq-calc\n" + self.prompt)
         self.set_input_start()
+
+    def set_font_size(self, point_size: int):
+        new_font = QFont("Courier New", point_size)
+        self.setFont(new_font)
+        self.document().setDefaultFont(new_font)
+        
+        cursor = self.textCursor()
+        old_pos = cursor.position()
+        cursor.select(QTextCursor.Document)
+        fmt = QTextCharFormat()
+        fmt.setFont(new_font)
+        cursor.mergeCharFormat(fmt)
+        cursor.setPosition(old_pos)
+        self.setTextCursor(cursor)
 
     def paste(self):
         clipboard = QApplication.clipboard()
